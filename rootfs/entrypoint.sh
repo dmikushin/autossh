@@ -28,9 +28,13 @@ fi
 
 # Add entry to /etc/passwd if we are running non-root
 if [ "$(id -u)" != "0" ]; then
-    USER="autossh:x:$(id -u):$(id -g):autossh:/tmp:/bin/sh"
-    echo "[INFO ] Creating non-root-user = $USER"
-    echo "$USER" >>/etc/passwd
+    if ! grep -q ":$(id -u):" /etc/passwd 2>/dev/null; then
+        PASSWD_ENTRY="autossh:x:$(id -u):$(id -g):autossh:/tmp:/bin/sh"
+        echo "[INFO ] Creating non-root-user = $PASSWD_ENTRY"
+        if ! echo "$PASSWD_ENTRY" >> /etc/passwd 2>/dev/null; then
+            echo "[WARN ] Could not write to /etc/passwd, mount a custom /etc/passwd if SSH behaves unexpectedly"
+        fi
+    fi
 fi
 
 _EFFECTIVE_MODE="${SSH_MODE:=-R}"
