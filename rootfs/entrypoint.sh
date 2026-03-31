@@ -53,8 +53,12 @@ echo "[INFO ] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_P
     " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}" \
     " to ${SSH_TARGET_HOST:=localhost}:${SSH_TARGET_PORT:=22}"
 
+if [ "${SSH_MONITOR_PORT:-0}" != "0" ]; then
+    echo "[INFO ] Monitor port enabled on ${SSH_MONITOR_PORT} (echo on $(( SSH_MONITOR_PORT + 1 )))"
+fi
+
 COMMAND="autossh \
-    -M 0 \
+    -M ${SSH_MONITOR_PORT:-0} \
     -N  \
     -o StrictHostKeyChecking=${STRICT_HOSTS_KEY_CHECKING} ${KNOWN_HOSTS_ARG:=} \
     -o ServerAliveInterval=${SSH_SERVER_ALIVE_INTERVAL:-10} \

@@ -250,6 +250,19 @@ Sets the threshold of alive messages after which the connection is terminated an
 
 Additional details are available from [`ssh_config(5)`](https://linux.die.net/man/5/ssh_config)
 
+#### SSH_MONITOR_PORT
+
+Enables autossh's built-in tunnel monitor. autossh listens on this port locally
+and creates a loopback port-forward through the tunnel to verify end-to-end
+connectivity. If the echo stops, autossh reconnects. Uses two consecutive ports
+(`SSH_MONITOR_PORT` and `SSH_MONITOR_PORT + 1`); ensure both are available on
+the container.
+
+- `0` disables the monitor (default).
+- When enabled, provides a second health-check layer independent of SSH keepalives.
+
+Additional details are available from [`autossh(1)`](https://linux.die.net/man/1/autossh)
+
 #### SSH_OPTIONS
 
 Sets additional parameters to `ssh` connection. Supports more than one parameter.
