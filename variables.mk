@@ -36,11 +36,3 @@ debug-variables:
 docker:
 	docker rmi ${APPLICATION}:${BRANCH} || true
 	docker build ${DOCKER_BUILD_ARGS} -t ${APPLICATION}:${BRANCH} .
-
-# update-hooks downloads the newest version of any multi-arch hooks from the parent template repository
-update-hooks:
-	curl -Lo hooks/build https://github.com/jnovack/docker-multi-arch-hooks/raw/master/hooks/build
-	curl -Lo hooks/post_checkout https://github.com/jnovack/docker-multi-arch-hooks/raw/master/hooks/post_checkout
-	curl -Lo hooks/post_push https://github.com/jnovack/docker-multi-arch-hooks/raw/master/hooks/post_push
-	curl -Lo variables.mk https://github.com/jnovack/docker-multi-arch-hooks/raw/master/variables.mk
-	curl -Lo go.mk https://github.com/jnovack/docker-multi-arch-hooks/raw/master/go.mk
