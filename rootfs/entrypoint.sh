@@ -47,7 +47,7 @@ DEFAULT_PORT=$(awk 'BEGIN { srand(); printf "%d", int(rand() * 10) + 32768 }')
 echo "[INFO ] Using $(autossh -V)"
 echo "[INFO ] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
     " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}" \
-    " to ${SSH_TARGET_HOST=localhost}:${SSH_TARGET_PORT:=22}"
+    " to ${SSH_TARGET_HOST:=localhost}:${SSH_TARGET_PORT:=22}"
 
 COMMAND="autossh \
     -M 0 \
