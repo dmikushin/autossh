@@ -1,6 +1,8 @@
 #!/usr/bin/dumb-init /bin/sh
 # shellcheck shell=sh
 
+. /version.sh
+
 # Set up key file
 KEY_FILE=${SSH_KEY_FILE:=/id_rsa}
 if [ ! -f "${KEY_FILE}" ]; then
@@ -25,7 +27,7 @@ if [ -f "${KNOWN_HOSTS}" ]; then
 fi
 
 # Add entry to /etc/passwd if we are running non-root
-if [[ $(id -u) != "0" ]]; then
+if [ "$(id -u)" != "0" ]; then
     USER="autossh:x:$(id -u):$(id -g):autossh:/tmp:/bin/sh"
     echo "[INFO ] Creating non-root-user = $USER"
     echo "$USER" >>/etc/passwd
@@ -36,7 +38,7 @@ if [ -n "${SSH_BIND_IP}" ] && [ "${SSH_MODE}" = "-R" ]; then
 fi
 
 # Pick a random port above 32768
-DEFAULT_PORT=$(($RANDOM % 10 + 32768))
+DEFAULT_PORT=$(awk 'BEGIN { srand(); printf "%d", int(rand() * 10) + 32768 }')
 
 # Determine command line flags
 
