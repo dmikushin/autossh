@@ -4,13 +4,13 @@ BUILD_RFC3339 := $(shell date -u +"%Y-%m-%dT%H:%M:%S+00:00")
 PACKAGE := $(shell git remote get-url --push origin | sed -E 's/.+[@|/].+[/|:](.+)\/(.+).git/\1\/\2/')
 REVISION := $(shell git rev-parse HEAD)
 VERSION := $(shell git describe --tags)
-DESCRIPTION := $(shell curl -s https://api.github.com/repos/${PACKAGE} \
+DESCRIPTION = $(shell curl -s https://api.github.com/repos/${PACKAGE} \
     | grep '"description".*' \
     | head -n 1 \
     | cut -d '"' -f 4)
 WORKDIR := $(shell pwd)
 
-DOCKER_BUILD_ARGS := \
+DOCKER_BUILD_ARGS = \
 	--build-arg APPLICATION=${APPLICATION} \
 	--build-arg BUILD_RFC3339=${BUILD_RFC3339} \
 	--build-arg DESCRIPTION="${DESCRIPTION}" \
