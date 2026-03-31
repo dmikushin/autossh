@@ -93,7 +93,7 @@ It is a two-step process.
 
 To make this a one-step process (connecting from *source* to *target* via
 *remote*), you must make some security changes on the *remote* (not-advised).
-Please see the [SSH_BIND_IP](#SSH_BIND_IP) section below.
+Please see the [SSH_BIND_IP](#ssh_bind_ip) section below.
 
 #### Disclaimer
 
@@ -269,7 +269,7 @@ Additional details are available from [`ssh_config(5)`](https://linux.die.net/ma
 ### Mounts
 
 Mounts are optional, for simple usage.  It is far superior to use
-[environment variables](#Environment_Variables) which can be stored in
+[environment variables](#environment-variables) which can be stored in
 configuration files and transported (and backed up!) easily.
 
 #### /id_rsa
