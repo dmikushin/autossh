@@ -1,5 +1,5 @@
 #!/usr/bin/dumb-init /bin/sh
-source version.sh
+# shellcheck shell=sh
 
 # Set up key file
 KEY_FILE=${SSH_KEY_FILE:=/id_rsa}
