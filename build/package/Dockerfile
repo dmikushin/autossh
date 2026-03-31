@@ -40,7 +40,7 @@ ENV \
   PACKAGE="${PACKAGE}" \
   VERSION="${VERSION}"
 
-ADD rootfs/entrypoint.sh /entrypoint.sh
-ADD rootfs/version.sh /version.sh
+COPY rootfs/entrypoint.sh /entrypoint.sh
+COPY rootfs/version.sh /version.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
