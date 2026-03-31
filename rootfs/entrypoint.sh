@@ -33,7 +33,8 @@ if [ "$(id -u)" != "0" ]; then
     echo "$USER" >>/etc/passwd
 fi
 
-if [ -n "${SSH_BIND_IP}" ] && [ "${SSH_MODE}" = "-R" ]; then
+_EFFECTIVE_MODE="${SSH_MODE:=-R}"
+if [ -n "${SSH_BIND_IP}" ] && [ "${_EFFECTIVE_MODE}" = "-R" ]; then
     echo "[WARN ] SSH_BIND_IP requires GatewayPorts configured on the server to work properly"
 fi
 
