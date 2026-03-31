@@ -49,9 +49,20 @@ DEFAULT_PORT=$(awk 'BEGIN { srand(); printf "%d", int(rand() * 10) + 32768 }')
 
 # Log to stdout
 echo "[INFO ] Using $(autossh -V)"
-echo "[INFO ] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
-    " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}" \
-    " to ${SSH_TARGET_HOST:=localhost}:${SSH_TARGET_PORT:=22}"
+if [ "${_EFFECTIVE_MODE}" = "-D" ]; then
+    echo "[INFO ] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}} SOCKS5" \
+        " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}"
+else
+    echo "[INFO ] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
+        " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}" \
+        " to ${SSH_TARGET_HOST:=localhost}:${SSH_TARGET_PORT:=22}"
+fi
+
+if [ "${_EFFECTIVE_MODE}" = "-D" ]; then
+    TUNNEL_ARG="${_EFFECTIVE_MODE} ${SSH_BIND_IP}:${SSH_TUNNEL_PORT}"
+else
+    TUNNEL_ARG="${_EFFECTIVE_MODE} ${SSH_BIND_IP}:${SSH_TUNNEL_PORT}:${SSH_TARGET_HOST}:${SSH_TARGET_PORT}"
+fi
 
 if [ "${SSH_MONITOR_PORT:-0}" != "0" ]; then
     echo "[INFO ] Monitor port enabled on ${SSH_MONITOR_PORT} (echo on $(( SSH_MONITOR_PORT + 1 )))"
@@ -65,7 +76,7 @@ COMMAND="autossh \
     -o ServerAliveCountMax=${SSH_SERVER_ALIVE_COUNT_MAX:-3} \
     -o ExitOnForwardFailure=yes \
     -t -t \
-    ${SSH_MODE:=-R} ${SSH_BIND_IP}:${SSH_TUNNEL_PORT}:${SSH_TARGET_HOST}:${SSH_TARGET_PORT} \
+    ${TUNNEL_ARG} \
     -p ${SSH_REMOTE_PORT:=22} \
     ${SSH_REMOTE_USER}@${SSH_REMOTE_HOST} \
     ${SSH_OPTIONS} \

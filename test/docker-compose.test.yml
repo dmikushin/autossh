@@ -7,12 +7,12 @@ services:
       dockerfile: Dockerfile.openssh
     hostname: bootloader
     command: /usr/bin/dumb-init /bin/sh -c "(
-              echo y | ssh-keygen -C testing -f /opt/id_rsa -N '';
-              cp /opt/id_rsa.pub /opt/authorized_keys;
-              chmod 600 /opt/authorized_keys;
-              sleep 300;
-              exit 1;
-            )"
+      echo y | ssh-keygen -C testing -f /opt/id_rsa -N '';
+      cp /opt/id_rsa.pub /opt/authorized_keys;
+      chmod 600 /opt/authorized_keys;
+      sleep 300;
+      exit 1;
+      )"
     volumes:
       - sshkeys:/opt/
 
@@ -24,13 +24,13 @@ services:
       - bootloader
     hostname: target
     command: /bin/sh -c "(
-              if test -f "/root/.ssh/target.txt"; then rm /root/.ssh/target.txt; fi;
-              sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config;
-              echo root:root | chpasswd;
-              ssh-keygen -A;
-              touch /root/.ssh/target.txt;
-              /usr/sbin/sshd -D -e
-            )"
+      if test -f "/root/.ssh/target.txt"; then rm /root/.ssh/target.txt; fi;
+      sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config;
+      echo root:root | chpasswd;
+      ssh-keygen -A;
+      touch /root/.ssh/target.txt;
+      /usr/sbin/sshd -D -e
+      )"
     networks:
       testnet:
         ipv4_address: 203.0.113.100
@@ -45,21 +45,20 @@ services:
     depends_on:
       - bootloader
     command: /bin/sh -c "(
-              if test -f "/root/.ssh/remote.txt"; then rm /root/.ssh/remote.txt; fi;
-              sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config;
-              sed -i 's/GatewayPorts no/GatewayPorts clientspecified/' /etc/ssh/sshd_config;
-              sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config;
-              echo root:root | chpasswd;
-              ssh-keygen -A;
-              touch /root/.ssh/remote.txt;
-              /usr/sbin/sshd -D -e
-            )"
+      if test -f "/root/.ssh/remote.txt"; then rm /root/.ssh/remote.txt; fi;
+      sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config;
+      sed -i 's/GatewayPorts no/GatewayPorts clientspecified/' /etc/ssh/sshd_config;
+      sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config;
+      echo root:root | chpasswd;
+      ssh-keygen -A;
+      touch /root/.ssh/remote.txt;
+      /usr/sbin/sshd -D -e
+      )"
     networks:
       testnet:
         ipv4_address: 203.0.113.10
     volumes:
       - sshkeys:/root/.ssh/
-
 
   local:
     build:
@@ -84,10 +83,10 @@ services:
       - SSH_KNOWN_HOSTS_FILE=/dev/null
       - SSH_STRICT_HOST_IP_CHECK=false
     entrypoint: /bin/sh -c "(
-              while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
-              while [ ! -f /opt/target.txt ]; do echo 'waiting for target...'; sleep 2; done;
-              /entrypoint.sh
-            )"
+      while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
+      while [ ! -f /opt/target.txt ]; do echo 'waiting for target...'; sleep 2; done;
+      /entrypoint.sh
+      )"
     networks:
       testnet:
         ipv4_address: 203.0.113.111
@@ -119,13 +118,44 @@ services:
       - SSH_KNOWN_HOSTS_FILE=/dev/null
       - SSH_STRICT_HOST_IP_CHECK=false
     entrypoint: /bin/sh -c "(
-              while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
-              while [ ! -f /opt/target.txt ]; do echo 'waiting for target...'; sleep 2; done;
-              /entrypoint.sh
-            )"
+      while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
+      while [ ! -f /opt/target.txt ]; do echo 'waiting for target...'; sleep 2; done;
+      /entrypoint.sh
+      )"
     networks:
       testnet:
         ipv4_address: 203.0.113.112
+    restart: always
+    volumes:
+      - sshkeys:/opt/
+
+  local-socks:
+    build:
+      context: ../
+      dockerfile: build/package/Dockerfile
+    hostname: local-socks
+    depends_on:
+      - bootloader
+      - remote
+      - target
+    environment:
+      - TERM=xterm
+      - SSH_MODE=-D
+      - SSH_BIND_IP=0.0.0.0
+      - SSH_REMOTE_USER=root
+      - SSH_REMOTE_HOST=203.0.113.10
+      - SSH_REMOTE_PORT=22
+      - SSH_TUNNEL_PORT=1080
+      - SSH_KEY_FILE=/opt/id_rsa
+      - SSH_KNOWN_HOSTS_FILE=/dev/null
+      - SSH_STRICT_HOST_IP_CHECK=false
+    entrypoint: /bin/sh -c "(
+      while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
+      /entrypoint.sh
+      )"
+    networks:
+      testnet:
+        ipv4_address: 203.0.113.113
     restart: always
     volumes:
       - sshkeys:/opt/
@@ -138,18 +168,24 @@ services:
     depends_on:
       - local
       - local-monitor
+      - local-socks
     command: /usr/bin/dumb-init /bin/sh -c "(
-              while [ ! -f /opt/id_rsa ]; do echo 'waiting for ssh-keygen...'; sleep 2; done;
-              while [ ! -f /opt/authorized_keys ]; do echo 'waiting for authorized_keys...'; sleep 2; done;
-              while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
-              while [ ! -f /opt/target.txt ]; do echo 'waiting for target...'; sleep 2; done;
-              while ! nc -z 203.0.113.10 11111 ; do echo 'waiting for port 11111...'; sleep 2; done;
-              ssh -o StrictHostKeyChecking=no -i /opt/id_rsa root@203.0.113.10 -p 11111 -C 'if [ `hostname` == "target" ]; then echo '[INFO ] success'; exit 0; else echo '[PANIC] hostname is not target'; exit 69; fi';
-              RC=$?; if [ $RC -ne 0 ]; then exit $RC; fi;
-              while ! nc -z 203.0.113.10 11112 ; do echo 'waiting for port 11112...'; sleep 2; done;
-              ssh -o StrictHostKeyChecking=no -i /opt/id_rsa root@203.0.113.10 -p 11112 -C 'if [ `hostname` == "target" ]; then echo '[INFO ] success with-monitor'; exit 0; else echo '[PANIC] hostname is not target'; exit 69; fi';
-              exit $?
-            )"
+      while [ ! -f /opt/id_rsa ]; do echo 'waiting for ssh-keygen...'; sleep 2; done;
+      while [ ! -f /opt/authorized_keys ]; do echo 'waiting for authorized_keys...'; sleep 2; done;
+      while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
+      while [ ! -f /opt/target.txt ]; do echo 'waiting for target...'; sleep 2; done;
+      while ! nc -z 203.0.113.10 11111 ; do echo 'waiting for port 11111...'; sleep 2; done;
+      ssh -o StrictHostKeyChecking=no -i /opt/id_rsa root@203.0.113.10 -p 11111 -C 'if [ `hostname` == "target" ]; then echo '[INFO ] success'; exit 0; else echo '[PANIC] hostname is not target'; exit 69; fi';
+      RC=$$?; if [ $$RC -ne 0 ]; then exit $$RC; fi;
+      echo testing local-monitor...;
+      while ! nc -z 203.0.113.10 11112 ; do echo 'waiting for port 11112...'; sleep 2; done;
+      ssh -o StrictHostKeyChecking=no -i /opt/id_rsa root@203.0.113.10 -p 11112 -C 'if [ `hostname` == "target" ]; then echo '[INFO ] success local-monitor'; exit 0; else echo '[PANIC] hostname is not target'; exit 69; fi';
+      RC=$$?; if [ $$RC -ne 0 ]; then exit $$RC; fi;
+      echo testing local-socks...;
+      while ! nc -z 203.0.113.113 1080 ; do echo 'waiting for port 1080...'; sleep 2; done;
+      echo '[INFO ] success local-socks';
+      exit $?
+      )"
     networks:
       testnet:
         ipv4_address: 203.0.113.200
