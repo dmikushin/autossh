@@ -14,16 +14,17 @@ ssh-add -k - <"${SSH_KEY_FILE}"
 
 # If known_hosts is provided, STRICT_HOST_KEY_CHECKING=yes
 # Default CheckHostIP=yes unless SSH_STRICT_HOST_IP_CHECK=false
-STRICT_HOSTS_KEY_CHECKING=no
+STRICT_HOST_KEY_CHECKING=no
+KNOWN_HOSTS_ARG=""
 KNOWN_HOSTS=${SSH_KNOWN_HOSTS_FILE:=/known_hosts}
 if [ -f "${KNOWN_HOSTS}" ]; then
     KNOWN_HOSTS_ARG="-o UserKnownHostsFile=${KNOWN_HOSTS} "
-    if [ "${SSH_STRICT_HOST_IP_CHECK}" = false ]; then
+    if [ "${SSH_STRICT_HOST_IP_CHECK}" = "false" ]; then
         KNOWN_HOSTS_ARG="${KNOWN_HOSTS_ARG}-o CheckHostIP=no "
-        echo "[WARN ] Not using STRICT_HOSTS_KEY_CHECKING"
+        echo "[WARN ] SSH_STRICT_HOST_IP_CHECK=false, disabling CheckHostIP"
     fi
-    STRICT_HOSTS_KEY_CHECKING=yes
-    echo "[INFO ] Using STRICT_HOSTS_KEY_CHECKING"
+    STRICT_HOST_KEY_CHECKING=yes
+    echo "[INFO ] Using STRICT_HOST_KEY_CHECKING"
 fi
 
 # Add entry to /etc/passwd if we are running non-root
@@ -71,7 +72,7 @@ fi
 COMMAND="autossh \
     -M ${SSH_MONITOR_PORT:-0} \
     -N  \
-    -o StrictHostKeyChecking=${STRICT_HOSTS_KEY_CHECKING} ${KNOWN_HOSTS_ARG:=} \
+    -o StrictHostKeyChecking=${STRICT_HOST_KEY_CHECKING} ${KNOWN_HOSTS_ARG} \
     -o ServerAliveInterval=${SSH_SERVER_ALIVE_INTERVAL:-10} \
     -o ServerAliveCountMax=${SSH_SERVER_ALIVE_COUNT_MAX:-3} \
     -o ExitOnForwardFailure=yes \

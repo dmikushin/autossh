@@ -81,7 +81,7 @@ services:
       - SSH_OPTIONS="-o StreamLocalBindUnlink=yes -o UseRoaming=no"
       - SSH_KEY_FILE=/opt/id_rsa
       - SSH_KNOWN_HOSTS_FILE=/dev/null
-      - SSH_STRICT_HOST_IP_CHECK=false
+      - SSH_STRICT_HOST_IP_CHECK="false"
     entrypoint: /bin/sh -c "(
       while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
       while [ ! -f /opt/target.txt ]; do echo 'waiting for target...'; sleep 2; done;
@@ -116,7 +116,7 @@ services:
       - SSH_OPTIONS="-o StreamLocalBindUnlink=yes -o UseRoaming=no"
       - SSH_KEY_FILE=/opt/id_rsa
       - SSH_KNOWN_HOSTS_FILE=/dev/null
-      - SSH_STRICT_HOST_IP_CHECK=false
+      - SSH_STRICT_HOST_IP_CHECK="false"
     entrypoint: /bin/sh -c "(
       while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
       while [ ! -f /opt/target.txt ]; do echo 'waiting for target...'; sleep 2; done;
@@ -148,7 +148,7 @@ services:
       - SSH_TUNNEL_PORT=1080
       - SSH_KEY_FILE=/opt/id_rsa
       - SSH_KNOWN_HOSTS_FILE=/dev/null
-      - SSH_STRICT_HOST_IP_CHECK=false
+      - SSH_STRICT_HOST_IP_CHECK="false"
     entrypoint: /bin/sh -c "(
       while [ ! -f /opt/remote.txt ]; do echo 'waiting for remote...'; sleep 2; done;
       /entrypoint.sh

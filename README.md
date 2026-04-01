@@ -188,7 +188,8 @@ my other project [ambassador](https://hub.docker.com/r/jnovack/ambassador/).
 Set to `false` if you want the IP addresses of hosts to **not** be checked if
 the `known_hosts` file is provided.  This can help avoid issues for hosts with
 dynamic IP addresses, but removes some additional protection against DNS
-spoofing attacks.  Host IP Checking is enabled by default.
+spoofing attacks.  Host IP Checking is enabled by default. This does not
+disable `StrictHostKeyChecking` when `known_hosts` is provided.
 
 #### SSH_KEY_FILE
 
